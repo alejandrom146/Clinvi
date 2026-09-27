@@ -37,7 +37,14 @@ export function validateReserva(d: DatosPaciente): Errores<keyof DatosPaciente> 
   const e: Errores<keyof DatosPaciente> = {};
   if (d.nombre.trim().length < 2) e.nombre = 'Ingresá tu nombre completo.';
   if (!isEmail(d.email)) e.email = 'Ingresá un email válido.';
-  if (d.whatsapp.trim() && !isWhatsapp(d.whatsapp)) e.whatsapp = 'Ingresá un número válido (con código de área).';
+  
+  // WhatsApp obligatorio y validación de formato
+  if (!d.whatsapp.trim()) {
+    e.whatsapp = 'Ingresá tu número de WhatsApp.';
+  } else if (!isWhatsapp(d.whatsapp)) {
+    e.whatsapp = 'Ingresá un número válido (con código de área).';
+  }
+
   if (d.motivo.length > 500) e.motivo = 'Máximo 500 caracteres.';
   return e;
 }

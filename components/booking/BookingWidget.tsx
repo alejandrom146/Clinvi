@@ -236,8 +236,8 @@ export default function BookingWidget({ profesionalId, nombreProfesional, estado
           <Field label="Email de contacto" htmlFor="b-email" error={errores.email} required>
             <Input id="b-email" type="email" value={datos.email} onChange={(e) => set('email', e.target.value)} invalid={Boolean(errores.email)} autoComplete="email" />
           </Field>
-          <Field label="WhatsApp (opcional)" htmlFor="b-wa" error={errores.whatsapp}>
-            <Input id="b-wa" type="tel" value={datos.whatsapp} onChange={(e) => set('whatsapp', e.target.value)} invalid={Boolean(errores.whatsapp)} autoComplete="tel" placeholder="Ej: 5493511234567" />
+          <Field label="WhatsApp" htmlFor="b-wa" error={errores.whatsapp} required>
+            <Input id="b-wa" type="tel" value={datos.whatsapp} onChange={(e) => set('whatsapp', e.target.value)} invalid={Boolean(errores.whatsapp)} autoComplete="tel" placeholder="Ej: 5493511234567" required />
           </Field>
           <Field label="Motivo de consulta (opcional)" htmlFor="b-motivo" error={errores.motivo}>
             <Textarea id="b-motivo" value={datos.motivo} onChange={(e) => set('motivo', e.target.value)} maxLength={500} className="min-h-[80px]" />
