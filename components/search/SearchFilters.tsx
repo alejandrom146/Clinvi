@@ -75,13 +75,16 @@ export default function SearchFilters({ initial, motivos }: Props) {
   }
 
   const motivoActual = motivos.find((m) => m.id === filtros.motivo);
-  const pills = [
+
+const pillsRaw = [
   filtros.q ? { key: 'q' as const, label: `“${filtros.q}”` } : null,
   filtros.especialidad ? { key: 'especialidad' as const, label: filtros.especialidad } : null,
   motivoActual ? { key: 'motivo' as const, label: motivoActual.motivo } : null,
   filtros.provincia ? { key: 'provincia' as const, label: filtros.provincia } : null,
   filtros.modalidad ? { key: 'modalidad' as const, label: filtros.modalidad } : null,
-].filter((p): p is { key: keyof FiltrosBusqueda; label: string } => p !== null);
+];
+
+const pills = pillsRaw.filter((p): p is NonNullable<typeof p> => p !== null);
 
   function quitar(key: keyof FiltrosBusqueda) {
     if (key === 'especialidad') update('especialidad', '');
