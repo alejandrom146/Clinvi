@@ -11,13 +11,13 @@ export async function createClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
-        } catch {
-          // Llamado desde un Server Component: el middleware se encarga de refrescar la sesión.
-        }
-      },
+      setAll(cookiesToSet: any) {
+  try {
+    cookiesToSet.forEach(({ name, value, options }: any) => cookieStore.set(name, value, options));
+  } catch {
+    // Manejo de errores
+  }
+}
     },
   });
 }
