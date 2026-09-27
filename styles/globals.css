@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Sistema visual ClinVi (valores RGB para permitir opacidad en Tailwind) ── */
+:root {
+  color-scheme: light;
+
+  --clinvi-cream: 242 237 232;
+  --clinvi-cream-dark: 232 224 216;
+  --clinvi-white: 255 255 255;
+
+  --clinvi-forest: 45 74 66;
+  --clinvi-forest-mid: 61 100 89;
+  --clinvi-forest-50: 238 243 241;
+  --clinvi-forest-100: 220 231 227;
+  --clinvi-forest-200: 187 207 200;
+  --clinvi-forest-300: 143 175 165;
+  --clinvi-forest-400: 94 133 121;
+  --clinvi-forest-500: 61 100 89;
+  --clinvi-forest-700: 37 62 55;
+  --clinvi-forest-800: 30 51 45;
+  --clinvi-forest-900: 23 40 35;
+
+  --clinvi-terra: 196 122 90;
+  /* Terracota más oscura para fondos con texto blanco (contraste ≥ 4.5:1). */
+  --clinvi-terra-strong: 169 96 63;
+  --clinvi-terra-deep: 139 74 46;
+  --clinvi-terra-light: 240 224 214;
+
+  --clinvi-mist: 122 152 152;
+  --clinvi-mist-light: 216 230 230;
+
+  --clinvi-text: 30 46 42;
+  --clinvi-text-mid: 74 94 88;
+  --clinvi-text-soft: 138 158 152;
+  --clinvi-border: 216 208 200;
+  --clinvi-border-light: 237 232 226;
+  --clinvi-danger: 139 58 42;
+
+  --clinvi-radius: 10px;
+  --clinvi-radius-lg: 16px;
+  --clinvi-radius-xl: 24px;
+
+  --clinvi-shadow-sm: 0 1px 4px rgba(45, 74, 66, 0.08);
+  --clinvi-shadow-md: 0 4px 20px rgba(45, 74, 66, 0.12);
+  --clinvi-shadow-lg: 0 8px 40px rgba(45, 74, 66, 0.16);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-canvas text-ink antialiased;
+}
+
+@layer base {
+  h1,
+  h2 {
+    @apply font-serif text-forest;
+    letter-spacing: -0.01em;
+  }
+  /* Especificidad 0 para que cualquier clase de color (botones-link) tenga prioridad. */
+  :where(a) {
+    color: rgb(var(--clinvi-forest));
+  }
+  :where(a:hover) {
+    color: rgb(var(--clinvi-forest-mid));
+  }
+}
+
+h1,
+h2,
+h3,
+p {
+  text-wrap: pretty;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
