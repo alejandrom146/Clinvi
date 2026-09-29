@@ -10,6 +10,7 @@ import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardTitle } from '@/components/ui/Card';
 import Stars from '@/components/ui/Stars';
 import { ESTADO_PROFESIONAL_LABEL, modalidadLabel } from '@/lib/constants';
+import { agruparPorTipo, etiquetaCompleta, etiquetaCorta } from '@/lib/coberturas';
 import { filtrosToQuery } from '@/lib/search';
 import { formatPrecio, whatsappLink } from '@/lib/utils';
 import WeeklySchedule from './WeeklySchedule';
@@ -56,7 +57,7 @@ export default function ProfessionalProfile({ profesional: p, resenas, isOwner }
           <div className="flex flex-col gap-5 pb-7 pt-6 sm:flex-row sm:items-start sm:gap-7">
             <Avatar nombre={p.nombre} src={p.avatar_url} size="lg" />
             <div className="min-w-0 flex-1">
-              <h1 className="text-[30px] font-bold leading-tight">{p.nombre}</h1>
+              <h1 className="text-[30px] font-normal leading-tight">{p.nombre}</h1>
               <p className="mt-1 text-[15px] text-muted">{p.subtitulo || p.especialidad}</p>
               {p.provincia && (
                 <p className="mt-1.5 inline-flex items-center gap-1 text-[13px] text-muted">
@@ -128,6 +129,30 @@ export default function ProfessionalProfile({ profesional: p, resenas, isOwner }
             </Section>
           )}
 
+          {p.coberturas.length > 0 && (
+            <Section title="Coberturas que acepta">
+              <div className="space-y-3">
+                {agruparPorTipo(p.coberturas).map((g) => (
+                  <div key={g.tipo}>
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{g.label}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {g.coberturas.map((c) => (
+                        <Link
+                          key={c.id}
+                          href={`/buscar${filtrosToQuery({ especialidad: p.especialidad, cobertura: c.id })}`}
+                          title={etiquetaCompleta(c)}
+                          className="rounded-full border-[1.5px] border-line bg-white px-4 py-1.5 text-[13px] font-medium text-muted transition-colors hover:border-forest hover:text-forest"
+                        >
+                          {etiquetaCorta(c)}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
+
           <Section title="Horarios de atención">
             <WeeklySchedule horarios={p.horarios} />
           </Section>
@@ -142,7 +167,7 @@ export default function ProfessionalProfile({ profesional: p, resenas, isOwner }
 
         <aside id="reservar" className="scroll-mt-24">
           <div className="rounded-clinvi-lg border-[1.5px] border-line bg-white p-5 shadow-clinvi-md sm:p-6 lg:sticky lg:top-20">
-            <p className="font-serif text-[30px] font-bold leading-none text-ink">
+            <p className="font-serif text-[30px] font-normal leading-none text-ink">
               {formatPrecio(p.precio)}
               {p.precio !== null && <small className="ml-1 font-sans text-sm font-normal text-muted">/ consulta</small>}
             </p>

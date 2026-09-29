@@ -12,12 +12,13 @@ export default function AdminNav({ resenasPendientes }: { resenasPendientes: num
   const items = [
     { href: '/admin', label: 'Profesionales', active: pathname === '/admin' || pathname.startsWith('/admin/profesionales') },
     { href: '/admin/motivos', label: 'Motivos', active: pathname.startsWith('/admin/motivos') },
+    { href: '/admin/coberturas', label: 'Coberturas', active: pathname.startsWith('/admin/coberturas') },
     { href: '/admin/turnos', label: 'Turnos', active: pathname.startsWith('/admin/turnos') },
     { href: '/admin/resenas', label: 'Reseñas', active: pathname.startsWith('/admin/resenas'), badge: resenasPendientes },
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-white shadow-clinvi-sm">
+    <header className="sticky top-0 z-40 border-b border-line bg-cream shadow-clinvi-sm">
       <div className="mx-auto flex h-16 w-full max-w-[1050px] items-center justify-between gap-3 px-4 sm:px-7">
         <div className="flex items-center gap-3">
           <Logo />

@@ -6,45 +6,44 @@
 :root {
   color-scheme: light;
 
-  --clinvi-cream: 242 237 232;
-  --clinvi-cream-dark: 232 224 216;
-  --clinvi-white: 255 255 255;
+  --clinvi-cream: 245 239 227;
+  --clinvi-cream-dark: 235 227 212;
+  --clinvi-white: 251 248 242;
 
-  --clinvi-forest: 45 74 66;
-  --clinvi-forest-mid: 61 100 89;
-  --clinvi-forest-50: 238 243 241;
-  --clinvi-forest-100: 220 231 227;
-  --clinvi-forest-200: 187 207 200;
-  --clinvi-forest-300: 143 175 165;
-  --clinvi-forest-400: 94 133 121;
-  --clinvi-forest-500: 61 100 89;
-  --clinvi-forest-700: 37 62 55;
-  --clinvi-forest-800: 30 51 45;
-  --clinvi-forest-900: 23 40 35;
+  --clinvi-forest: 47 59 55;
+  --clinvi-forest-mid: 69 84 79;
+  --clinvi-forest-50: 238 240 238;
+  --clinvi-forest-100: 221 226 223;
+  --clinvi-forest-200: 188 197 193;
+  --clinvi-forest-300: 150 163 158;
+  --clinvi-forest-400: 107 122 117;
+  --clinvi-forest-500: 69 84 79;
+  --clinvi-forest-700: 39 49 46;
+  --clinvi-forest-800: 31 40 37;
+  --clinvi-forest-900: 23 30 28;
 
-  --clinvi-terra: 196 122 90;
-  /* Terracota más oscura para fondos con texto blanco (contraste ≥ 4.5:1). */
-  --clinvi-terra-strong: 169 96 63;
-  --clinvi-terra-deep: 139 74 46;
-  --clinvi-terra-light: 240 224 214;
+  --clinvi-terra: 198 123 84;
+    --clinvi-terra-strong: 198 123 84;
+  --clinvi-terra-deep: 176 106 69;
+  --clinvi-terra-light: 243 227 214;
 
-  --clinvi-mist: 122 152 152;
-  --clinvi-mist-light: 216 230 230;
+  --clinvi-mist: 129 146 140;
+  --clinvi-mist-light: 222 228 224;
 
-  --clinvi-text: 30 46 42;
-  --clinvi-text-mid: 74 94 88;
-  --clinvi-text-soft: 138 158 152;
-  --clinvi-border: 216 208 200;
-  --clinvi-border-light: 237 232 226;
+  --clinvi-text: 47 59 55;
+  --clinvi-text-mid: 78 91 86;
+  --clinvi-text-soft: 111 127 121;
+  --clinvi-border: 221 212 196;
+  --clinvi-border-light: 234 227 214;
   --clinvi-danger: 139 58 42;
 
   --clinvi-radius: 10px;
   --clinvi-radius-lg: 16px;
   --clinvi-radius-xl: 24px;
 
-  --clinvi-shadow-sm: 0 1px 4px rgba(45, 74, 66, 0.08);
-  --clinvi-shadow-md: 0 4px 20px rgba(45, 74, 66, 0.12);
-  --clinvi-shadow-lg: 0 8px 40px rgba(45, 74, 66, 0.16);
+  --clinvi-shadow-sm: 0 1px 4px rgba(47, 59, 55, 0.08);
+  --clinvi-shadow-md: 0 4px 20px rgba(47, 59, 55, 0.12);
+  --clinvi-shadow-lg: 0 8px 40px rgba(47, 59, 55, 0.16);
 }
 
 html {
@@ -58,7 +57,7 @@ body {
 @layer base {
   h1,
   h2 {
-    @apply font-serif text-forest;
+    @apply font-serif font-normal text-forest;
     letter-spacing: -0.01em;
   }
   /* Especificidad 0 para que cualquier clase de color (botones-link) tenga prioridad. */

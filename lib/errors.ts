@@ -12,6 +12,10 @@ const CODIGOS: Record<string, string> = {
   MOTIVO_INACTIVO: 'Alguno de los motivos elegidos ya no está disponible.',
   MOTIVO_DUPLICADO: 'Ya existe ese motivo para esta especialidad.',
   MOTIVO_ESPECIALIDAD_FIJA: 'No se puede cambiar la especialidad de un motivo que ya usan profesionales. Creá uno nuevo en la otra especialidad.',
+  COBERTURA_INVALIDA: 'Alguna de las coberturas elegidas no existe o ya no está disponible. Revisá la selección.',
+  COBERTURA_INACTIVA: 'Alguna de las coberturas elegidas ya no está disponible.',
+  COBERTURA_DUPLICADA: 'Ya existe una cobertura con ese nombre (o esa sigla) en la misma provincia.',
+  BUSQUEDA_FALLIDA: 'No pudimos completar la búsqueda. Intentá nuevamente en unos minutos.',
   NO_AUTORIZADO: 'No tenés permisos para realizar esta acción.',
 };
 
@@ -31,6 +35,9 @@ const MENSAJES: Array<[string, string]> = [
   ['public.motivos_consulta', 'Falta ejecutar supabase/motivos_consulta.sql en Supabase.'],
   ['public.profesional_motivos', 'Falta ejecutar supabase/motivos_consulta.sql en Supabase.'],
   ['public.set_profesional_motivos', 'Falta ejecutar supabase/motivos_consulta.sql en Supabase.'],
+  ['public.coberturas', 'Falta ejecutar supabase/coberturas.sql en Supabase.'],
+  ['public.profesional_coberturas', 'Falta ejecutar supabase/coberturas.sql en Supabase.'],
+  ['public.set_profesional_coberturas', 'Falta ejecutar supabase/coberturas.sql en Supabase.'],
   ['Supabase no configurado', ''],
 ];
 

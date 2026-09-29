@@ -67,9 +67,46 @@ export interface ProfesionalMotivo {
   created_at: string;
 }
 
-/** Perfil público: horarios + motivos activos de la lista maestra. */
+export type TipoCobertura = 'obra_social_nacional' | 'obra_social_provincial' | 'prepaga' | 'otra';
+export type OrigenCobertura = 'csv_inicial' | 'admin';
+
+export interface Cobertura {
+  id: string;
+  tipo: TipoCobertura;
+  nombre: string;
+  sigla: string | null;
+  provincia: string | null;
+  activo: boolean;
+  notas: string | null;
+  origen: OrigenCobertura;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProfesionalCobertura {
+  profesional_id: string;
+  cobertura_id: string;
+  created_at: string;
+}
+
+/** Datos editables de una cobertura desde el panel admin. */
+export interface CoberturaInput {
+  tipo: TipoCobertura;
+  nombre: string;
+  sigla: string;
+  provincia: string;
+  notas: string;
+}
+
+/** Cobertura del panel admin con la cantidad de profesionales que la tienen asociada. */
+export interface CoberturaAdmin extends Cobertura {
+  profesionales_count: number;
+}
+
+/** Perfil público: horarios + motivos y coberturas activos de las listas maestras. */
 export interface ProfesionalConDetalle extends ProfesionalConHorarios {
   motivosConsulta: MotivoConsulta[];
+  coberturas: Cobertura[];
 }
 
 export interface MotivoInput {
@@ -121,6 +158,8 @@ export interface FiltrosBusqueda {
   provincia: string;
   modalidad: '' | Modalidad;
   motivo: string;
+  /** Id de una cobertura activa ('' = sin filtro). */
+  cobertura: string;
   orden: Orden;
 }
 
@@ -160,6 +199,8 @@ export interface RegistroInput {
   habilidades: string[];
   /** IDs de motivos_consulta (validados en la base). */
   motivoIds: string[];
+  /** IDs de coberturas (validados en la base). */
+  coberturaIds: string[];
   modalidad: Modalidad;
   precio: number | null;
   whatsapp: string;

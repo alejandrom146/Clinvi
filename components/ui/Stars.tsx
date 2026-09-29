@@ -27,7 +27,7 @@ export default function Stars({
         ))}
       </span>
       {showValue && (
-        <span className={cn('font-semibold text-ink', size === 'sm' ? 'text-[13px]' : 'font-serif text-2xl font-bold text-forest')}>{v > 0 ? v.toFixed(1) : 'Nuevo'}</span>
+        <span className={cn('font-semibold text-ink', size === 'sm' ? 'text-[13px]' : 'font-serif text-2xl font-normal text-forest')}>{v > 0 ? v.toFixed(1) : 'Nuevo'}</span>
       )}
       {count !== undefined && count > 0 && <span className="text-xs text-muted">({count})</span>}
     </span>

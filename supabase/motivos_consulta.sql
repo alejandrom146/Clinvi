@@ -94,8 +94,12 @@ begin
     raise exception 'MOTIVO_INACTIVO';
   end if;
 
-  select count(*) into v_count from public.profesional_motivos
-  where profesional_id = new.profesional_id and motivo_id <> new.motivo_id;
+  -- Solo cuentan los motivos ACTIVOS: los vínculos con motivos desactivados se
+  -- conservan como historial y no ocupan lugar en el máximo.
+  select count(*) into v_count
+  from public.profesional_motivos pm
+  join public.motivos_consulta m on m.id = pm.motivo_id
+  where pm.profesional_id = new.profesional_id and pm.motivo_id <> new.motivo_id and m.activo;
   if v_count >= 8 then
     raise exception 'MOTIVOS_MAXIMO';
   end if;
@@ -186,6 +190,7 @@ create trigger refrescar_busqueda_motivo
 -- ---------------------------------------------------------------------
 -- 6. RPC: reemplaza la selección de motivos de un profesional (atómico)
 --    Verifica: sesión, dueño o admin, 1..8, misma especialidad, activos.
+--    Preserva los vínculos con motivos desactivados (historial).
 -- ---------------------------------------------------------------------
 create or replace function public.set_profesional_motivos(p_profesional_id uuid, p_motivo_ids uuid[])
 returns void language plpgsql security definer set search_path = public as $$
@@ -226,8 +231,14 @@ begin
     raise exception 'MOTIVO_INVALIDO';
   end if;
 
-  delete from public.profesional_motivos
-  where profesional_id = p_profesional_id and not (motivo_id = any(v_ids));
+  -- Solo quita vínculos de motivos ACTIVOS: los de motivos desactivados se preservan
+  -- (no se muestran ni se usan en el buscador, y reaparecen si el motivo se reactiva).
+  delete from public.profesional_motivos pm
+  using public.motivos_consulta m
+  where pm.profesional_id = p_profesional_id
+    and m.id = pm.motivo_id
+    and m.activo
+    and not (pm.motivo_id = any(v_ids));
 
   insert into public.profesional_motivos (profesional_id, motivo_id)
   select p_profesional_id, x from unnest(v_ids) as x
@@ -299,11 +310,17 @@ create policy "motivos: admin edita" on public.motivos_consulta
 -- Sin policy de DELETE: los motivos no se borran físicamente (se desactivan).
 revoke delete on public.motivos_consulta from anon, authenticated;
 
+-- Público: solo vínculos de profesionales activos con motivos ACTIVOS
+-- (los vínculos históricos con motivos desactivados no se exponen).
+-- El propio profesional ve todos sus vínculos; el admin ve todo.
 drop policy if exists "profesional_motivos: lectura" on public.profesional_motivos;
 create policy "profesional_motivos: lectura" on public.profesional_motivos
   for select using (
-    exists (select 1 from public.profesionales p where p.id = profesional_id
-            and (p.estado = 'activo' or p.user_id = auth.uid()))
+    exists (select 1 from public.profesionales p where p.id = profesional_id and p.user_id = auth.uid())
+    or (
+      exists (select 1 from public.profesionales p where p.id = profesional_id and p.estado = 'activo')
+      and exists (select 1 from public.motivos_consulta m where m.id = motivo_id and m.activo)
+    )
     or public.is_admin()
   );
 

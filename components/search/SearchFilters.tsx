@@ -5,9 +5,10 @@ import { useMemo, useState, useTransition, type FormEvent } from 'react';
 import { Loader2, Search, X } from 'lucide-react';
 import { Select } from '@/components/ui/Field';
 import { ESPECIALIDADES, MODALIDADES, PROVINCIAS } from '@/lib/constants';
-import { filtrosToQuery } from '@/lib/search';
+import { agruparPorTipo, etiquetaCompleta, etiquetaCorta } from '@/lib/coberturas';
+import { cambiarFiltro, filtrosToQuery } from '@/lib/search';
 import { cn } from '@/lib/utils';
-import type { FiltrosBusqueda, Modalidad, MotivoConsulta, Orden } from '@/types';
+import type { Cobertura, FiltrosBusqueda, Modalidad, MotivoConsulta, Orden } from '@/types';
 
 const ORDENES: { value: Orden; label: string }[] = [
   { value: 'rating', label: '★ Mejor puntuados' },
@@ -21,6 +22,8 @@ interface Props {
   initial: FiltrosBusqueda;
   /** Motivos activos de la lista maestra. */
   motivos: MotivoConsulta[];
+  /** Coberturas activas de la lista maestra. */
+  coberturas: Cobertura[];
 }
 
 const chip =
@@ -29,7 +32,7 @@ const chip =
 const chipOn = 'border-forest bg-forest text-white hover:bg-forest-mid';
 const chipOff = 'border-line bg-white text-muted';
 
-export default function SearchFilters({ initial, motivos }: Props) {
+export default function SearchFilters({ initial, motivos, coberturas }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [filtros, setFiltros] = useState<FiltrosBusqueda>(initial);
@@ -40,17 +43,8 @@ export default function SearchFilters({ initial, motivos }: Props) {
   }
 
   function update<K extends keyof FiltrosBusqueda>(key: K, value: FiltrosBusqueda[K]) {
-    const next: FiltrosBusqueda = { ...filtros, [key]: value };
-    // El motivo depende de la especialidad: si deja de corresponder, se limpia.
-    if (key === 'especialidad' && next.motivo) {
-      const actual = motivos.find((m) => m.id === next.motivo);
-      if (!actual || actual.especialidad !== value) next.motivo = '';
-    }
-    // Elegir un motivo fija su especialidad.
-    if (key === 'motivo' && value) {
-      const m = motivos.find((x) => x.id === value);
-      if (m) next.especialidad = m.especialidad;
-    }
+    // El motivo depende de la especialidad; la cobertura es independiente (ver lib/search.ts).
+    const next = cambiarFiltro(filtros, key, value, motivos);
     setFiltros(next);
     apply(next);
   }
@@ -75,21 +69,23 @@ export default function SearchFilters({ initial, motivos }: Props) {
   }
 
   const motivoActual = motivos.find((m) => m.id === filtros.motivo);
-
-const pillsRaw = [
-  filtros.q ? { key: 'q' as const, label: `“${filtros.q}”` } : null,
-  filtros.especialidad ? { key: 'especialidad' as const, label: filtros.especialidad } : null,
-  motivoActual ? { key: 'motivo' as const, label: motivoActual.motivo } : null,
-  filtros.provincia ? { key: 'provincia' as const, label: filtros.provincia } : null,
-  filtros.modalidad ? { key: 'modalidad' as const, label: filtros.modalidad } : null,
-];
-
-const pills = pillsRaw.filter((p): p is NonNullable<typeof p> => p !== null);
+  const coberturaActual = coberturas.find((c) => c.id === filtros.cobertura);
+  const gruposCobertura = useMemo(() => agruparPorTipo(coberturas), [coberturas]);
+  type Pill = { key: keyof FiltrosBusqueda; label: string };
+  const candidatas: (Pill | null)[] = [
+    filtros.q ? { key: 'q', label: `“${filtros.q}”` } : null,
+    filtros.especialidad ? { key: 'especialidad', label: filtros.especialidad } : null,
+    motivoActual ? { key: 'motivo', label: motivoActual.motivo } : null,
+    coberturaActual ? { key: 'cobertura', label: etiquetaCorta(coberturaActual) } : null,
+    filtros.provincia ? { key: 'provincia', label: filtros.provincia } : null,
+    filtros.modalidad ? { key: 'modalidad', label: MODALIDADES.find((m) => m.value === filtros.modalidad)?.label ?? filtros.modalidad } : null,
+  ];
+  const pills = candidatas.filter((x): x is Pill => x !== null);
 
   function quitar(key: keyof FiltrosBusqueda) {
     if (key === 'especialidad') update('especialidad', '');
     else if (key === 'modalidad') update('modalidad', '');
-    else if (key === 'q' || key === 'motivo' || key === 'provincia') update(key, '');
+    else if (key === 'q' || key === 'motivo' || key === 'provincia' || key === 'cobertura') update(key, '');
   }
 
   return (
@@ -121,6 +117,23 @@ const pills = pillsRaw.filter((p): p is NonNullable<typeof p> => p !== null);
             <option key={m.value} value={m.value}>
               {m.label}
             </option>
+          ))}
+        </Select>
+        <Select
+          aria-label="Cobertura médica"
+          value={filtros.cobertura}
+          onChange={(e) => update('cobertura', e.target.value)}
+          className="w-auto min-w-0 flex-[1_1_100%] sm:max-w-[260px] sm:flex-[1_1_220px]"
+        >
+          <option value="">Todas las coberturas</option>
+          {gruposCobertura.map((g) => (
+            <optgroup key={g.tipo} label={g.label}>
+              {g.coberturas.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {etiquetaCompleta(c)}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </Select>
         <Select aria-label="Provincia" value={filtros.provincia} onChange={(e) => update('provincia', e.target.value)} className="w-auto flex-[1_1_170px] sm:flex-none">

@@ -17,7 +17,7 @@ export default function ProfessionalCard({ profesional: p }: { profesional: Prof
       <div className="flex items-start gap-3.5 px-5 pb-3.5 pt-[22px]">
         <Avatar nombre={p.nombre} src={p.avatar_url} />
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-serif text-lg font-bold leading-snug text-forest">{p.nombre}</h3>
+          <h3 className="truncate font-serif text-lg font-normal leading-snug text-forest">{p.nombre}</h3>
           <p className="mt-0.5 text-[13px] text-muted">
             {p.especialidad}
             {p.provincia && (
@@ -51,7 +51,7 @@ export default function ProfessionalCard({ profesional: p }: { profesional: Prof
       <div className="flex-1" />
       <div className="flex items-center justify-between gap-3 border-t border-line-light px-5 py-3.5">
         <div className="min-w-0">
-          <p className="font-serif text-lg font-bold text-ink">
+          <p className="font-serif text-lg font-normal text-ink">
             {formatPrecio(p.precio)}
             {p.precio !== null && <small className="ml-1 font-sans text-xs font-normal text-muted">/ consulta</small>}
           </p>

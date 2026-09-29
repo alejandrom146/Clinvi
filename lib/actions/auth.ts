@@ -23,7 +23,8 @@ export interface RegistroResultado {
 
 /**
  * Registra al profesional en Supabase Auth. El trigger handle_new_user crea
- * automáticamente su perfil con estado "pendiente" a partir de los metadatos.
+ * automáticamente su perfil con estado "pendiente" a partir de los metadatos,
+ * y los triggers de motivos y coberturas vinculan las opciones elegidas (solo activas).
  */
 export async function registrarProfesional(input: RegistroInput, avatar: File | null): Promise<RegistroResultado> {
   const supabase = createClient();
@@ -42,6 +43,7 @@ export async function registrarProfesional(input: RegistroInput, avatar: File | 
         bio: input.bio.trim(),
         habilidades: input.habilidades,
         motivo_ids: input.motivoIds,
+        cobertura_ids: input.coberturaIds,
         modalidad: input.modalidad,
         precio: input.precio === null ? '' : String(input.precio),
         whatsapp: input.whatsapp.trim(),

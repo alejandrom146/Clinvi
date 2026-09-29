@@ -40,7 +40,7 @@ export default function Modal({ open, onClose, title, description, children }: M
         >
           <X className="h-4 w-4" />
         </button>
-        <h2 className="pr-10 text-2xl font-bold">{title}</h2>
+        <h2 className="pr-10 text-2xl font-normal">{title}</h2>
         {description && <p className="mt-1 text-sm leading-relaxed text-muted">{description}</p>}
         <div className="mt-6">{children}</div>
       </div>

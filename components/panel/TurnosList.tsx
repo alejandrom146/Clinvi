@@ -63,10 +63,10 @@ export default function TurnosList({ turnos, showProfesional = false, emptyText 
               return (
                 <li key={t.id} className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:gap-3.5">
                   <div className="flex items-center gap-3.5">
-                    <span className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-cream-dark font-serif text-sm font-bold text-forest" aria-hidden="true">
+                    <span className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-cream-dark font-serif text-sm font-normal text-forest" aria-hidden="true">
                       {initials(t.pac_nombre)}
                     </span>
-                    <span className="font-serif text-xl font-bold text-forest sm:hidden">{t.hora}</span>
+                    <span className="font-serif text-xl font-normal text-forest sm:hidden">{t.hora}</span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">

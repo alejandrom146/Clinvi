@@ -1,5 +1,5 @@
 import { Apple, Baby, Brain, Dumbbell, Ear, Pill, Smile, Sparkles, Stethoscope, type LucideIcon } from 'lucide-react';
-import type { EstadoProfesional, EstadoResena, Modalidad } from '@/types';
+import type { EstadoProfesional, EstadoResena, Modalidad, TipoCobertura } from '@/types';
 
 export interface Especialidad {
   nombre: string;
@@ -85,3 +85,13 @@ export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 /** Límites de motivos por profesional (también validados en la base). */
 export const MAX_MOTIVOS = 8;
 export const MIN_MOTIVOS = 1;
+
+/** Tipos de cobertura en el orden en que se muestran (también validados en la base). */
+export const TIPOS_COBERTURA: { value: TipoCobertura; label: string; plural: string }[] = [
+  { value: 'obra_social_nacional', label: 'Obra social nacional', plural: 'Obras sociales nacionales' },
+  { value: 'obra_social_provincial', label: 'Obra social provincial', plural: 'Obras sociales provinciales' },
+  { value: 'prepaga', label: 'Prepaga', plural: 'Prepagas' },
+  { value: 'otra', label: 'Otra', plural: 'Otras opciones' },
+];
+
+export const TIPO_COBERTURA_VALUES: TipoCobertura[] = TIPOS_COBERTURA.map((t) => t.value);

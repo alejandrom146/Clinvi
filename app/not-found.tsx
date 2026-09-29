@@ -11,7 +11,7 @@ export default function NotFound() {
         <SearchX className="h-7 w-7" aria-hidden="true" />
       </div>
       <p className="mt-6 text-sm font-semibold text-brand-700">Error 404</p>
-      <h1 className="mt-2 text-3xl font-bold text-ink">No encontramos esta página</h1>
+      <h1 className="mt-2 text-3xl font-normal text-ink">No encontramos esta página</h1>
       <p className="mt-2 max-w-md text-muted">Puede que el enlace esté mal escrito o que el perfil ya no esté disponible.</p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link href="/" className={buttonClasses('primary')}>

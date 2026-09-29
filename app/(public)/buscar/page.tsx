@@ -5,6 +5,8 @@ import SearchFilters from '@/components/search/SearchFilters';
 import SetupNotice from '@/components/SetupNotice';
 import { EmptyState } from '@/components/ui/Card';
 import { isSupabaseConfigured } from '@/lib/config';
+import { etiquetaCorta } from '@/lib/coberturas';
+import { getCoberturasActivas } from '@/lib/queries/coberturas';
 import { getMotivosActivos } from '@/lib/queries/motivos';
 import { searchProfesionales } from '@/lib/queries/profesionales';
 import { filtrosToQuery, parseFiltros, resolverFiltros } from '@/lib/search';
@@ -23,10 +25,11 @@ export default async function BuscarPage({ searchParams }: { searchParams: Promi
     );
   }
 
-  const motivos = await getMotivosActivos();
-  const { filtros, motivo } = resolverFiltros(parsed, motivos);
+  const [motivos, coberturas] = await Promise.all([getMotivosActivos(), getCoberturasActivas()]);
+  const { filtros, motivo, cobertura } = resolverFiltros(parsed, motivos, coberturas);
   const resultados = await searchProfesionales(filtros);
-  const titulo = motivo ? `${motivo.especialidad}: ${motivo.motivo}` : filtros.especialidad || 'Profesionales';
+  const base = motivo ? `${motivo.especialidad}: ${motivo.motivo}` : filtros.especialidad || 'Profesionales';
+  const titulo = cobertura ? `${base} · ${etiquetaCorta(cobertura)}` : base;
 
   return (
     <>
@@ -34,7 +37,7 @@ export default async function BuscarPage({ searchParams }: { searchParams: Promi
         <div className="mx-auto max-w-[1100px]">
           <h1 className="text-[28px] font-bold leading-tight">{titulo}</h1>
           <p className="mb-4 mt-1 text-sm text-muted">Solo mostramos profesionales con matrícula verificada.</p>
-          <SearchFilters key={filtrosToQuery(filtros)} initial={filtros} motivos={motivos} />
+          <SearchFilters key={filtrosToQuery(filtros)} initial={filtros} motivos={motivos} coberturas={coberturas} />
         </div>
       </div>
 
@@ -46,7 +49,7 @@ export default async function BuscarPage({ searchParams }: { searchParams: Promi
           <EmptyState
             icon={SearchX}
             title="No encontramos profesionales con esos criterios"
-            description="Probá con otra especialidad, otro motivo de consulta o quitá algunos filtros."
+            description="Probá con otra especialidad, otro motivo de consulta, otra cobertura o quitá algunos filtros."
           />
         ) : (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">

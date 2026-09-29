@@ -6,14 +6,16 @@ import Alert from '@/components/ui/Alert';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import { Field, Input, Select, Textarea } from '@/components/ui/Field';
-import { actualizarAvatar, actualizarPerfil, guardarMotivos } from '@/lib/actions/profesional';
+import { actualizarAvatar, actualizarPerfil, guardarCoberturas, guardarMotivos } from '@/lib/actions/profesional';
+import CoberturasSelector from '@/components/coberturas/CoberturasSelector';
+import { mismaSeleccion, seleccionValida } from '@/lib/coberturas';
 import MotivosSelector from '@/components/motivos/MotivosSelector';
 import { confirmarCambioEspecialidad, motivosDeEspecialidad } from '@/lib/motivos';
 import { ESPECIALIDAD_NOMBRES, ESTADO_PROFESIONAL_LABEL, MODALIDADES, PROVINCIAS } from '@/lib/constants';
 import { getErrorMessage } from '@/lib/errors';
 import { splitList } from '@/lib/utils';
 import { hasErrors, parsePrecio, validateAvatar, validateMotivos, validatePerfil, type DatosPerfil, type Errores } from '@/lib/validation';
-import type { EstadoProfesional, Modalidad, MotivoConsulta, PerfilEditable, Profesional } from '@/types';
+import type { Cobertura, EstadoProfesional, Modalidad, MotivoConsulta, PerfilEditable, Profesional } from '@/types';
 
 interface Props {
   profesional: Profesional;
@@ -22,6 +24,10 @@ interface Props {
   motivos: MotivoConsulta[];
   /** Motivos activos actualmente seleccionados. */
   motivoIds: string[];
+  /** Coberturas activas de la lista maestra. */
+  coberturas: Cobertura[];
+  /** Coberturas activas actualmente seleccionadas. */
+  coberturaIds: string[];
 }
 
 interface FormState extends DatosPerfil {
@@ -32,7 +38,7 @@ interface FormState extends DatosPerfil {
   estado: EstadoProfesional;
 }
 
-export default function ProfileEditor({ profesional: p, mode, motivos, motivoIds: motivoIdsIniciales }: Props) {
+export default function ProfileEditor({ profesional: p, mode, motivos, motivoIds: motivoIdsIniciales, coberturas, coberturaIds: coberturaIdsIniciales }: Props) {
   const router = useRouter();
   const [f, setF] = useState<FormState>({
     nombre: p.nombre,
@@ -55,6 +61,10 @@ export default function ProfileEditor({ profesional: p, mode, motivos, motivoIds
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [motivoIds, setMotivoIds] = useState<string[]>(motivoIdsIniciales);
   const [motivosError, setMotivosError] = useState<string | undefined>(undefined);
+  const [coberturaIds, setCoberturaIds] = useState<string[]>(coberturaIdsIniciales);
+  const [coberturasGuardadas, setCoberturasGuardadas] = useState<string[]>(coberturaIdsIniciales);
+  const [coberturasError, setCoberturasError] = useState<string | undefined>(undefined);
+  const coberturasPendientes = !mismaSeleccion(coberturaIds, coberturasGuardadas);
 
   function cambiarEspecialidad(nueva: string) {
     const r = confirmarCambioEspecialidad(motivoIds, motivos, nueva);
@@ -107,16 +117,35 @@ export default function ProfileEditor({ profesional: p, mode, motivos, motivoIds
       setSaving(false);
       return;
     }
+    const fallas: string[] = [];
     try {
       // 2) Motivos (validados otra vez en la base: dueño/admin, especialidad, activos, 1..8).
       await guardarMotivos(p.id, motivoIds);
-      setMsg({ type: 'success', text: 'Cambios guardados correctamente.' });
     } catch (err) {
-      setMsg({ type: 'error', text: `Los datos del perfil se guardaron, pero no los motivos de consulta: ${getErrorMessage(err)}` });
-    } finally {
-      setSaving(false);
-      router.refresh();
+      fallas.push(`los motivos de consulta (${getErrorMessage(err)})`);
     }
+    if (coberturasPendientes) {
+      try {
+        // 3) Coberturas (validadas en la base: dueño/admin, existentes y activas).
+        const ids = seleccionValida(coberturaIds, coberturas);
+        await guardarCoberturas(p.id, ids);
+        setCoberturaIds(ids);
+        setCoberturasGuardadas(ids);
+        setCoberturasError(undefined);
+      } catch (err) {
+        const texto = getErrorMessage(err);
+        setCoberturasError(texto);
+        fallas.push(`las coberturas (${texto})`);
+      }
+    }
+    // Solo se confirma el guardado cuando la base respondió sin errores.
+    setMsg(
+      fallas.length === 0
+        ? { type: 'success', text: 'Cambios guardados correctamente.' }
+        : { type: 'error', text: `Los datos del perfil se guardaron, pero no ${fallas.join(' ni ')}.` },
+    );
+    setSaving(false);
+    router.refresh();
   }
 
   async function onAvatar(file: File | null) {
@@ -210,6 +239,17 @@ export default function ProfileEditor({ profesional: p, mode, motivos, motivoIds
             setMsg(null);
           }}
           error={motivosError}
+        />
+        <CoberturasSelector
+          coberturas={coberturas}
+          value={coberturaIds}
+          onChange={(ids) => {
+            setCoberturaIds(ids);
+            setCoberturasError(undefined);
+            setMsg(null);
+          }}
+          error={coberturasError}
+          pendiente={coberturasPendientes}
         />
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Modalidad" htmlFor="pe-mod">

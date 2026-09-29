@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Isotipo } from '@/components/layout/Logo';
 import type { HomeStats } from '@/lib/queries/profesionales';
 import SearchBar from './SearchBar';
 import Stats from './Stats';
@@ -14,23 +13,17 @@ const SUGERENCIAS = [
 
 export default function Hero({ stats }: { stats: HomeStats }) {
   return (
-    <section className="relative overflow-hidden bg-forest px-5 pb-16 pt-14 text-center text-white sm:px-7 sm:pb-[88px] sm:pt-20">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse at 70% 20%, rgba(196,122,90,0.18) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(122,152,152,0.15) 0%, transparent 50%)',
-        }}
-        aria-hidden="true"
-      />
-      <div className="relative mx-auto max-w-[700px]">
-        <Isotipo light className="mx-auto mb-7 h-[72px] w-[72px] opacity-85" />
-        <h1 className="text-[clamp(34px,5.5vw,56px)] font-bold leading-[1.1] text-white">
+    <section className="border-b border-line bg-cream px-5 pb-16 pt-14 text-center text-forest sm:px-7 sm:pb-[88px] sm:pt-20">
+      <div className="mx-auto max-w-[700px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/clinvi-logo.jpg" alt="" className="mx-auto mb-[22px] block h-20 w-auto sm:h-24" />
+        <p className="mb-[22px] text-[11px] uppercase tracking-[0.28em] text-mist sm:text-[13px]">Clínica Interdisciplinaria Virtual</p>
+        <h1 className="text-[clamp(32px,5.5vw,56px)] font-normal leading-[1.1] text-forest">
           Salud profesional,
           <br />
-          <em className="not-italic text-terra">donde estés</em>
+          <em className="italic text-terra">donde estés</em>
         </h1>
-        <p className="mx-auto mb-10 mt-[18px] max-w-[460px] text-base font-light leading-[1.7] text-white/80 sm:text-[17px]">
+        <p className="mx-auto mb-10 mt-[18px] max-w-[460px] text-base leading-[1.7] text-muted sm:text-[17px]">
           Consultá con profesionales verificados de forma virtual. Reservá tu turno en minutos, sin intermediarios.
         </p>
         <div className="mx-auto max-w-[560px]">
@@ -41,7 +34,7 @@ export default function Hero({ stats }: { stats: HomeStats }) {
             <Link
               key={s.label}
               href={s.href}
-              className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[13px] text-white/90 transition-colors hover:bg-white/20 hover:text-white"
+              className="rounded-full border border-line bg-transparent px-4 py-1.5 text-[13px] text-muted transition-colors hover:border-mist hover:bg-white hover:text-muted"
             >
               {s.label}
             </Link>

@@ -21,6 +21,7 @@ const config: Config = {
           800: v('forest-800'),
           900: v('forest-900'),
         },
+        white: v('white'),
         forest: { DEFAULT: v('forest'), mid: v('forest-mid') },
         terra: { DEFAULT: v('terra'), strong: v('terra-strong'), deep: v('terra-deep'), light: v('terra-light') },
         mist: { DEFAULT: v('mist'), light: v('mist-light') },

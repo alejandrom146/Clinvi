@@ -37,14 +37,7 @@ export function validateReserva(d: DatosPaciente): Errores<keyof DatosPaciente> 
   const e: Errores<keyof DatosPaciente> = {};
   if (d.nombre.trim().length < 2) e.nombre = 'Ingresá tu nombre completo.';
   if (!isEmail(d.email)) e.email = 'Ingresá un email válido.';
-  
-  // WhatsApp obligatorio y validación de formato
-  if (!d.whatsapp.trim()) {
-    e.whatsapp = 'Ingresá tu número de WhatsApp.';
-  } else if (!isWhatsapp(d.whatsapp)) {
-    e.whatsapp = 'Ingresá un número válido (con código de área).';
-  }
-
+  if (d.whatsapp.trim() && !isWhatsapp(d.whatsapp)) e.whatsapp = 'Ingresá un número válido (con código de área).';
   if (d.motivo.length > 500) e.motivo = 'Máximo 500 caracteres.';
   return e;
 }
@@ -71,6 +64,18 @@ export function validatePerfil(d: DatosPerfil): Errores<keyof DatosPerfil> {
 
 export function hasErrors(e: Record<string, string | undefined>): boolean {
   return Object.values(e).some(Boolean);
+}
+
+/**
+ * Coberturas en el alta: al menos una (si atiende sin cobertura, "Particular").
+ * `disponibles`: coberturas activas de la lista maestra. Si no hay ninguna cargada,
+ * no se exige mínimo (no se bloquea el registro por falta de datos).
+ */
+export function validateCoberturas(ids: string[], disponibles: number): string | undefined {
+  if (disponibles > 0 && new Set(ids).size < 1) {
+    return 'Elegí al menos una cobertura. Si atendés sin obra social ni prepaga, elegí “Particular (sin cobertura)”.';
+  }
+  return undefined;
 }
 
 /** `disponibles`: motivos activos de la especialidad. Si no hay, no se exige mínimo. */

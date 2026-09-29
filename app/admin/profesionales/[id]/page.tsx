@@ -5,6 +5,7 @@ import PageHeader from '@/components/panel/PageHeader';
 import ProfileEditor from '@/components/panel/ProfileEditor';
 import { getSessionInfo } from '@/lib/auth';
 import { getProfesionalById } from '@/lib/queries/admin';
+import { getCoberturaIdsDeProfesional, getCoberturasActivas } from '@/lib/queries/coberturas';
 import { getMotivoIdsDeProfesional, getMotivosActivos } from '@/lib/queries/motivos';
 
 export default async function AdminEditarProfesional({ params }: { params: Promise<{ id: string }> }) {
@@ -16,7 +17,12 @@ export default async function AdminEditarProfesional({ params }: { params: Promi
   const profesional = await getProfesionalById(id);
   if (!profesional) notFound();
 
-  const [motivos, motivoIds] = await Promise.all([getMotivosActivos(), getMotivoIdsDeProfesional(profesional.id)]);
+  const [motivos, motivoIds, coberturas, coberturaIds] = await Promise.all([
+    getMotivosActivos(),
+    getMotivoIdsDeProfesional(profesional.id),
+    getCoberturasActivas(),
+    getCoberturaIdsDeProfesional(profesional.id),
+  ]);
 
   return (
     <div>
@@ -34,11 +40,13 @@ export default async function AdminEditarProfesional({ params }: { params: Promi
         }
       />
       <ProfileEditor
-        key={`${profesional.updated_at}-${motivoIds.join(',')}`}
+        key={`${profesional.updated_at}-${motivoIds.join(',')}-${coberturaIds.join(',')}`}
         profesional={profesional}
         mode="admin"
         motivos={motivos}
         motivoIds={motivoIds}
+        coberturas={coberturas}
+        coberturaIds={coberturaIds}
       />
     </div>
   );

@@ -16,7 +16,7 @@ export default function SearchBar({ defaultValue = '' }: { defaultValue?: string
   }
 
   return (
-    <form onSubmit={onSubmit} role="search" className="flex w-full overflow-hidden rounded-xl bg-white shadow-clinvi-lg">
+    <form onSubmit={onSubmit} role="search" className="flex w-full overflow-hidden rounded-xl border-[1.5px] border-line bg-white shadow-clinvi-md">
       <label htmlFor="hero-search" className="sr-only">
         Buscar profesionales
       </label>

@@ -15,7 +15,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-terra/10 text-danger">
         <AlertTriangle className="h-7 w-7" aria-hidden="true" />
       </div>
-      <h1 className="mt-6 text-2xl font-bold text-ink">Algo salió mal</h1>
+      <h1 className="mt-6 text-2xl font-normal text-ink">Algo salió mal</h1>
       <p className="mt-2 max-w-md text-sm text-muted">
         No pudimos cargar esta sección. Si el problema persiste, revisá la conexión con Supabase y que se haya ejecutado supabase/schema.sql.
       </p>

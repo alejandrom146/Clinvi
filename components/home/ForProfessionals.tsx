@@ -20,7 +20,7 @@ export default function ForProfessionals() {
       <div className="mx-auto grid max-w-[1100px] items-center gap-10 md:grid-cols-2 md:gap-14">
         <div>
           <p className="mb-2.5 text-xs font-semibold uppercase tracking-[0.1em] text-terra-strong">Para profesionales</p>
-          <h2 className="mb-3.5 text-[32px] font-bold leading-[1.2]">Tu consultorio virtual, sin complicaciones</h2>
+          <h2 className="mb-3.5 text-[32px] font-normal leading-[1.2]">Tu consultorio virtual, sin complicaciones</h2>
           <p className="mb-6 text-[15px] leading-[1.7] text-muted">
             Registrate, completá tu perfil y empezá a recibir pacientes. Verificamos tu matrícula manualmente antes de activar tu perfil.
           </p>
@@ -50,7 +50,7 @@ export default function ForProfessionals() {
           <div className="rounded-clinvi border border-line-light bg-white p-4">
             <div className="mb-3 flex items-center justify-between text-xs text-muted">
               <span>Turnos hoy</span>
-              <span className="font-serif text-lg font-bold text-forest">2</span>
+              <span className="font-serif text-lg font-normal text-forest">2</span>
             </div>
             <ul className="space-y-2">
               {PREVIEW.map((p) =>

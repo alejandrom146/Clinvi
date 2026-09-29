@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import RegisterForm from '@/components/auth/RegisterForm';
 import SetupNotice from '@/components/SetupNotice';
 import { isSupabaseConfigured } from '@/lib/config';
+import { getCoberturasActivas } from '@/lib/queries/coberturas';
 import { getMotivosActivos } from '@/lib/queries/motivos';
 
 export const metadata: Metadata = { title: 'Registro de profesional' };
@@ -14,7 +15,7 @@ export default async function RegistroPage() {
       </div>
     );
   }
-  const motivos = await getMotivosActivos();
+  const [motivos, coberturas] = await Promise.all([getMotivosActivos(), getCoberturasActivas()]);
   return (
     <div className="mx-auto w-full max-w-[720px] px-4 py-8 sm:px-7 sm:py-12">
       <div className="mb-6">
@@ -24,7 +25,7 @@ export default async function RegistroPage() {
           Completá tus datos. Verificamos tu matrícula manualmente antes de activar tu perfil.
         </p>
       </div>
-      <RegisterForm motivos={motivos} />
+      <RegisterForm motivos={motivos} coberturas={coberturas} />
     </div>
   );
 }

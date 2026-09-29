@@ -4,7 +4,7 @@ export default function StatCard({ label, value, icon: Icon, hint }: { label: st
   return (
     <div className="rounded-clinvi border border-line-light bg-white p-5 shadow-clinvi-sm sm:p-[22px]">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-serif text-[34px] font-bold leading-none text-forest">{value}</p>
+        <p className="font-serif text-[34px] font-normal leading-none text-forest">{value}</p>
         <Icon className="h-4 w-4 text-mist" aria-hidden="true" />
       </div>
       <p className="mt-1.5 text-[13px] text-muted">{label}</p>

@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import { Cormorant_Garamond, Inter } from 'next/font/google';
+import { Arimo, Tinos } from 'next/font/google';
 import '@/styles/globals.css';
 
-const sans = Inter({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-sans', display: 'swap' });
-const serif = Cormorant_Garamond({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-serif', display: 'swap' });
+const sans = Arimo({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-sans', display: 'swap' });
+const serif = Tinos({ subsets: ['latin'], weight: ['400', '700'], style: ['normal', 'italic'], variable: '--font-serif', display: 'swap' });
 
 export const metadata: Metadata = {
   title: { default: 'ClinVi — Clínica Interdisciplinaria Virtual', template: '%s · ClinVi' },
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#2D4A42',
+  themeColor: '#F5EFE3',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',

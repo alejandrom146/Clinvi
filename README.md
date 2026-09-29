@@ -70,9 +70,14 @@ En Supabase → **SQL Editor** → **New query**:
    Crea tablas, índices, funciones, triggers, políticas RLS y el bucket `avatars`. Se puede volver a ejecutar sin romper nada.
 2. Nueva query con [`supabase/motivos_consulta.sql`](supabase/motivos_consulta.sql) → **Run**.
    Crea la lista maestra de motivos de consulta (58 motivos), la relación profesional ↔ motivo, sus reglas y RLS. Es re-ejecutable y no duplica datos.
-3. (Opcional, recomendado para probar) Nueva query con [`supabase/seed.sql`](supabase/seed.sql) → **Run**.
+   > ¿Ya lo habías ejecutado antes de esta versión? Ejecutá además [`supabase/motivos_preservar_inactivos.sql`](supabase/motivos_preservar_inactivos.sql) (ver [sección 12](#12-motivos-de-consulta)). En una instalación nueva no hace falta.
+3. Nueva query con [`supabase/coberturas.sql`](supabase/coberturas.sql) → **Run**.
+   Crea la lista maestra de coberturas médicas, la relación profesional ↔ cobertura, sus reglas y RLS. No carga datos.
+4. Nueva query con [`supabase/coberturas_import.sql`](supabase/coberturas_import.sql) → **Run**.
+   Carga las 78 coberturas del CSV y muestra una fila por registro con la acción aplicada. Ver [sección 14](#14-coberturas-médicas).
+5. (Opcional, recomendado para probar) Nueva query con [`supabase/seed.sql`](supabase/seed.sql) → **Run**.
    Carga 8 profesionales demo (una por especialidad) con horarios y reseñas. Quedan marcados con `is_demo = true`.
-4. Para borrar los datos demo más adelante: ejecutá [`supabase/reset_demo.sql`](supabase/reset_demo.sql). No toca datos reales.
+6. Para borrar los datos demo más adelante: ejecutá [`supabase/reset_demo.sql`](supabase/reset_demo.sql). No toca datos reales.
 
 ### 3.3 Obtener las credenciales
 
@@ -222,14 +227,18 @@ clinvi-app/
 │   ├── reviews/   # ReviewButton, ReviewsList
 │   ├── auth/      # LoginForm, RegisterForm, RecoverForm, ResetPasswordForm, LogoutButton, AuthCard
 │   ├── panel/     # PanelSidebar, ScheduleEditor, ProfileEditor, TurnosList, StatCard, ShareLink…
-│   └── admin/     # AdminNav, AdminProfesionalRow, EstadoActions, ResenaModeration
+│   ├── coberturas/ # CoberturasSelector (registro y edición de perfil)
+│   └── admin/     # AdminNav, AdminProfesionalRow, EstadoActions, ResenaModeration, MotivosAdmin, CoberturasAdmin
 ├── lib/
 │   ├── supabase/  # client.ts (navegador), server.ts (servidor), middleware.ts
 │   ├── queries/   # Lecturas del lado servidor (profesionales, panel, admin)
 │   ├── actions/   # Mutaciones del lado cliente (auth, profesional, turnos, reseñas)
 │   ├── auth.ts  booking.ts  search.ts  validation.ts  errors.ts  constants.ts  utils.ts  config.ts
 ├── types/index.ts
-├── supabase/      # schema.sql, seed.sql, reset_demo.sql, create_admin.sql
+├── supabase/      # schema.sql, motivos_consulta.sql, coberturas.sql, coberturas_import.sql, verificar_*.sql, seed.sql…
+│   └── data/coberturas.csv  # Fuente de la carga inicial de coberturas
+├── scripts/       # generar-import-coberturas.mjs
+├── tests/         # unit/ (Vitest, sin Supabase) e integration/ (contra un Supabase de prueba)
 ├── styles/globals.css
 ├── middleware.ts  # Refresca la sesión y protege /panel y /admin
 └── .env.example
@@ -278,6 +287,8 @@ Todas usan UUID, foreign keys, timestamps e índices.
 | “Email not confirmed” | Confirmá el email o desactivá *Confirm email* para pruebas. |
 | No se sube la foto | Verificá que exista el bucket `avatars` (lo crea `schema.sql`). |
 | No veo “Administración” | Ejecutá `supabase/create_admin.sql` con tu email y volvé a ingresar. |
+| “Falta ejecutar supabase/coberturas.sql” | Ejecutá `coberturas.sql` y después `coberturas_import.sql`. |
+| El filtro de coberturas aparece vacío | Falta ejecutar `coberturas_import.sql`, o todas están desactivadas en `/admin/coberturas`. |
 
 ---
 
@@ -303,13 +314,17 @@ Lista maestra administrada en Supabase (`motivos_consulta`). Cada motivo pertene
 
 Reglas que aplica **la base de datos** (no solo la interfaz):
 
-- Máximo 8 motivos por profesional (trigger con bloqueo de fila) y mínimo 1 si su especialidad tiene motivos (función `set_profesional_motivos`).
+- Máximo 8 motivos **activos** por profesional (trigger con bloqueo de fila) y mínimo 1 si su especialidad tiene motivos (función `set_profesional_motivos`).
 - Solo motivos **activos** de la **misma especialidad** del profesional.
 - Si el profesional cambia de especialidad, se eliminan automáticamente los vínculos incompatibles. La interfaz avisa y pide confirmación antes.
 - Los motivos no se borran: se desactivan (`activo = false`). Sin policy de DELETE.
+- Desactivar un motivo **no borra** los vínculos, ni siquiera cuando el profesional vuelve a guardar su perfil: dejan de mostrarse y de usarse en el buscador, no ocupan lugar en el máximo de 8 y el público no puede leerlos. Al reactivar el motivo, reaparecen solos (igual que las coberturas).
+- Caso borde: si al reactivar un motivo un profesional queda con más de 8 activos, su perfil los muestra todos; al volver a guardar, el panel le pide quitar los sobrantes. El bloque E de `verificar_motivos.sql` los lista.
 - No se puede cambiar la especialidad de un motivo que ya usan profesionales.
 - Los profesionales solo modifican **sus** motivos mediante `set_profesional_motivos` (verifica sesión y dueño/admin). Solo admins crean o editan la lista maestra.
-- El público solo lee motivos activos y los vínculos de profesionales activos.
+- El público solo lee motivos activos y los vínculos (con motivos activos) de profesionales activos.
+
+**Actualización (migración 004)**: [`supabase/motivos_preservar_inactivos.sql`](supabase/motivos_preservar_inactivos.sql) aplica el comportamiento de conservar vínculos inactivos en una base que ya tenía `motivos_consulta.sql`. Solo reemplaza 2 funciones y 1 política; no toca datos. Los vínculos que la versión anterior haya borrado no se recuperan. El bloque **H** de `verificar_motivos.sql` prueba este comportamiento (crea datos temporales y los revierte).
 
 ### Migración de datos existentes
 
@@ -351,7 +366,7 @@ Los motivos son categorías de búsqueda, no diagnósticos.
 
 ### Antes de hacer deploy en Vercel
 
-- Ejecutar `motivos_consulta.sql` en el proyecto de Supabase de **producción** antes de publicar el código (si no, el buscador y el registro fallan).
+- Ejecutar `motivos_consulta.sql` en el proyecto de Supabase de **producción** antes de publicar el código (si no, el buscador y el registro fallan). Si ya estaba ejecutado, ejecutar `motivos_preservar_inactivos.sql`.
 - Revisar los bloques B–F de `verificar_motivos.sql` en producción.
 - `npm run build` localmente sin errores.
 - Confirmar que en Vercel solo están `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` (nunca la service_role).
@@ -374,6 +389,114 @@ Toda la paleta vive en `styles/globals.css` (variables `--clinvi-*`) y se expone
 | `rounded-clinvi` (10px), `rounded-clinvi-lg` (16px), `rounded-clinvi-xl` (24px) | Radios |
 | `shadow-clinvi-sm/md/lg` | Sombras |
 
-Tipografías: **Cormorant Garamond** (títulos, `font-serif`) e **Inter** (texto, `font-sans`), cargadas con `next/font`.
+Tipografías: **Tinos** (títulos, `font-serif`, peso 400) y **Arimo** (texto, `font-sans`), cargadas con `next/font`. Logo: `public/clinvi-logo.jpg`.
 
 Para cambiar un color de marca, editá la variable en `globals.css`: todos los componentes lo toman de ahí.
+
+---
+
+## 14. Coberturas médicas
+
+Lista maestra administrada en Supabase (`coberturas`): obras sociales nacionales y provinciales, prepagas y la opción “Particular (sin cobertura)”. Es la única fuente para el registro, la edición de perfil, el buscador, el perfil público y el panel admin. Los profesionales **eligen** de la lista; no escriben nombres libres.
+
+### Estructura
+
+| Tabla | Columnas |
+| --- | --- |
+| `coberturas` | `id`, `tipo`, `nombre`, `sigla`, `provincia`, `activo`, `notas`, `origen` (`csv_inicial` / `admin`), `created_at`, `updated_at` |
+| `profesional_coberturas` | `profesional_id`, `cobertura_id`, `created_at` (PK compuesta) |
+
+`tipo`: `obra_social_nacional`, `obra_social_provincial`, `prepaga`, `otra`. `provincia` solo admite las 24 jurisdicciones del sistema (obligatoria para las provinciales).
+
+**Identidad**: nombre (sin mayúsculas ni acentos) + provincia. La sigla **no** es única globalmente: OSEP existe en Catamarca y en Mendoza, IPS en Misiones y en Salta. Sí se impide repetir una sigla dentro de la misma provincia.
+
+Reglas que aplica **la base de datos**:
+
+- Sin límite de coberturas por profesional.
+- Solo se vinculan coberturas **existentes y activas** (trigger + función `set_profesional_coberturas`), aunque se manipule la petición.
+- Los profesionales solo modifican **sus** coberturas mediante `set_profesional_coberturas` (verifica sesión y dueño/admin). Solo admins crean o editan la lista maestra. Nadie las borra: se desactivan.
+- Desactivar una cobertura **no borra** los vínculos: dejan de mostrarse y de usarse en el buscador, y el público no puede leerlos. Si el profesional guarda su perfil, los vínculos con coberturas inactivas se conservan. Al reactivarla, reaparecen solos.
+- Registro: **hay que elegir al menos una cobertura** (si atiende sin cobertura, “Particular (sin cobertura)”). Las elegidas se vinculan automáticamente (solo activas). El mínimo lo exige el formulario: la base no bloquea el alta, porque un error en el registro de Supabase Auth se muestra como un error genérico. Si alguien se registrara salteando el formulario, su perfil queda `pendiente` sin coberturas hasta que un admin lo revise.
+
+### Carga inicial del CSV
+
+El archivo fuente es [`supabase/data/coberturas.csv`](supabase/data/coberturas.csv). [`supabase/coberturas_import.sql`](supabase/coberturas_import.sql) se genera a partir de él (ya está generado; no hace falta Node para usarlo):
+
+1. En Supabase → SQL Editor, ejecutá `coberturas.sql` (una vez).
+2. Ejecutá `coberturas_import.sql`. Muestra una fila por registro del CSV con la acción:
+   - `insertada`: se creó.
+   - `ya_existia_igual`: ya estaba, sin cambios.
+   - `ya_existia_con_cambios_admin`: ya estaba y fue editada en el panel (por ejemplo, desactivada). **No se modifica.**
+   - `conflicto_revisar`: otra cobertura usa la misma sigla en la misma provincia. **No se inserta**; revisalo a mano.
+3. Ejecutá [`supabase/verificar_coberturas.sql`](supabase/verificar_coberturas.sql): todas las filas deben decir `OK` (las `INFO` son informativas).
+
+Es seguro re-ejecutar el import: nunca reactiva coberturas desactivadas ni pisa notas editadas. Todo el script corre en una transacción: si algo falla, no queda nada a medias.
+
+Si modificás el CSV, regenerá el SQL con `npm run coberturas:generar-sql` (valida columnas, tipos, provincias y duplicados; si encuentra problemas, no genera nada y los lista).
+
+> `verificar_coberturas.sql` crea usuarios temporales para probar permisos y los revierte al terminar. Si tu proyecto no permite escribir en `auth.users` desde el SQL Editor, verás una fila `ERROR`; la sección de datos sigue siendo válida.
+
+### Dónde se usa
+
+- **Registro** (obligatorio, al menos una) y **Editar perfil** (`/panel/perfil`, `/admin/profesionales/[id]`): chips agrupados por tipo, buscador por nombre, sigla o provincia, resumen de seleccionadas y aviso de cambios sin guardar.
+- **Buscador** (`/buscar?cobertura=<uuid>`): filtro por **id** (nunca por texto), independiente de especialidad y motivo, que se combina con Y con los demás filtros. Cambiar la especialidad no borra la cobertura elegida.
+- **Perfil público**: sección “Coberturas que acepta”; cada cobertura enlaza al buscador.
+- **Administración** (`/admin/coberturas`): buscar, filtrar por tipo, provincia y estado, agregar, editar, activar/desactivar y ver qué profesionales la tienen asociada.
+
+### Cómo probar a mano
+
+1. `/admin/coberturas` → deberías ver 78 coberturas (77 activas; IOSFA inactiva).
+2. En `/registro` intentá registrarte sin elegir cobertura → te pide al menos una; elegí “Particular” → continúa.
+3. En `/panel/perfil` elegí OSDE, OSEP (Catamarca) y Particular → Guardar → recargá: siguen seleccionadas.
+4. `/buscar` → Cobertura “OSEP — Catamarca”: aparece ese profesional; con “OSEP — Mendoza”, no.
+5. Como admin desactivá OSDE → desaparece del filtro, del selector y del perfil público. Reactivala → vuelve, con los mismos profesionales.
+6. Probá en el celular (o con las herramientas de desarrollo en vista móvil): selector, filtro y perfil.
+
+### Antes de hacer deploy en Vercel
+
+- Ejecutar `coberturas.sql` y `coberturas_import.sql` en el Supabase de **producción** antes de publicar el código.
+- Revisar el resultado de `verificar_coberturas.sql` en producción.
+- `npm test` y `npm run build` sin errores.
+
+---
+
+## 15. Pruebas automatizadas
+
+Se usa **Vitest 3.2** (compatible con Node 18, 20 y 22). Las pruebas no reemplazan las verificaciones SQL de Supabase (RLS, permisos, integridad): se complementan.
+
+| Comando | Qué hace |
+| --- | --- |
+| `npm test` | Pruebas unitarias (`tests/unit`). Datos controlados, **sin llamadas a Supabase**. |
+| `npm run test:watch` | Igual, pero se re-ejecutan al guardar archivos. |
+| `npm run test:integration` | Pruebas de integración (`tests/integration`) contra un Supabase **de prueba**. Sin credenciales, se omiten. |
+| `npm run typecheck` | Verificación de tipos de TypeScript. |
+
+**Desde Visual Studio Code**: abrí la terminal integrada (**Terminal → New Terminal**) y ejecutá `npm test`. Para verlas en un panel con botones de “play” por prueba, instalá la extensión oficial **Vitest** (`vitest.explorer`): detecta `vitest.config.mts` automáticamente.
+
+### Qué cubren las unitarias
+
+- Filtrado por especialidad, motivo y cobertura, y sus combinaciones (se exigen **todos** los criterios).
+- Motivos con el mismo texto en distintas especialidades y coberturas con la misma sigla en distintas provincias: no se mezclan.
+- Motivos y coberturas inactivos, inexistentes o manipulados en la URL: se ignoran.
+- Sin profesionales duplicados; profesionales pendientes nunca aparecen.
+- Límites de 1 a 8 motivos; al menos una cobertura en el alta (sirve “Particular”; no cuentan inactivas ni ids inventados).
+- Orden y límite de 60 resultados.
+- Errores (sin detalles técnicos para el usuario) y resultados vacíos.
+
+`tests/unit/helpers/consultaFalsa.ts` reproduce en memoria la semántica de PostgREST que usa el buscador (incluido `!inner`), así que las pruebas ejecutan el código real de `lib/search.ts` y `lib/queries/profesionales.ts`.
+
+### Pruebas de integración (opcional)
+
+Usá **un proyecto de Supabase separado, nunca producción**:
+
+1. En el proyecto de prueba ejecutá `schema.sql`, `motivos_consulta.sql`, `coberturas.sql`, `coberturas_import.sql` y después [`tests/integration/fixture.sql`](tests/integration/fixture.sql).
+2. Ejecutá (PowerShell):
+   ```powershell
+   $env:CLINVI_TEST_SUPABASE_URL="https://<proyecto-de-prueba>.supabase.co"
+   $env:CLINVI_TEST_SUPABASE_ANON_KEY="<anon key del proyecto de prueba>"
+   npm run test:integration
+   ```
+   En macOS/Linux: `CLINVI_TEST_SUPABASE_URL=... CLINVI_TEST_SUPABASE_ANON_KEY=... npm run test:integration`
+3. Para limpiar los datos de prueba: [`tests/integration/fixture_cleanup.sql`](tests/integration/fixture_cleanup.sql).
+
+Usá siempre la **anon key**: las pruebas verifican lo que puede hacer un visitante, y la `service_role` saltearía las políticas RLS.

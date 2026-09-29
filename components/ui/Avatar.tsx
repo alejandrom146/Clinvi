@@ -9,8 +9,8 @@ const sizes = {
 // Degradados de la paleta ClinVi (forest→mist, terra, mist).
 const GRADIENTS = [
   'bg-gradient-to-br from-forest to-mist',
-  'bg-gradient-to-br from-terra-strong to-[#D4956A]',
-  'bg-gradient-to-br from-forest-mid to-[#9ABAAA]',
+  'bg-gradient-to-br from-terra to-[#D69A78]',
+  'bg-gradient-to-br from-mist to-[#A3B0AB]',
 ];
 
 function gradientFor(nombre: string): string {
@@ -38,7 +38,7 @@ export default function Avatar({
   }
   return (
     <div
-      className={cn('flex shrink-0 items-center justify-center rounded-full font-serif font-bold text-white', gradientFor(nombre), sizes[size], className)}
+      className={cn('flex shrink-0 items-center justify-center rounded-full font-serif font-normal text-white', gradientFor(nombre), sizes[size], className)}
       role="img"
       aria-label={nombre}
     >

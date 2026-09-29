@@ -53,6 +53,20 @@ export async function guardarMotivos(profesionalId: string, motivoIds: string[])
   if (error) throw error;
 }
 
+/**
+ * Reemplaza las coberturas activas del profesional vía RPC. La base verifica
+ * sesión, dueño/admin y que todas existan y estén activas. Los vínculos con
+ * coberturas desactivadas se conservan en la base.
+ */
+export async function guardarCoberturas(profesionalId: string, coberturaIds: string[]): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.rpc('set_profesional_coberturas', {
+    p_profesional_id: profesionalId,
+    p_cobertura_ids: Array.from(new Set(coberturaIds)),
+  });
+  if (error) throw error;
+}
+
 /** Sincroniza los horarios semanales: borra los quitados e inserta los nuevos. */
 export async function guardarHorarios(profesionalId: string, actuales: Horario[], seleccion: Set<string>): Promise<void> {
   const supabase = createClient();

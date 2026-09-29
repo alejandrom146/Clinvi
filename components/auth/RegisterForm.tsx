@@ -11,10 +11,12 @@ import { registrarProfesional } from '@/lib/actions/auth';
 import { ESPECIALIDAD_NOMBRES, MODALIDADES, PROVINCIAS } from '@/lib/constants';
 import { getErrorMessage } from '@/lib/errors';
 import { splitList } from '@/lib/utils';
-import { hasErrors, isEmail, isWhatsapp, parsePrecio, validateAvatar, validateMotivos, type Errores } from '@/lib/validation';
+import { hasErrors, isEmail, isWhatsapp, parsePrecio, validateAvatar, validateCoberturas, validateMotivos, type Errores } from '@/lib/validation';
 import MotivosSelector from '@/components/motivos/MotivosSelector';
+import CoberturasSelector from '@/components/coberturas/CoberturasSelector';
+import { seleccionValida } from '@/lib/coberturas';
 import { confirmarCambioEspecialidad, motivosDeEspecialidad } from '@/lib/motivos';
-import type { Modalidad, MotivoConsulta } from '@/types';
+import type { Cobertura, Modalidad, MotivoConsulta } from '@/types';
 
 interface FormState {
   nombre: string;
@@ -32,7 +34,7 @@ interface FormState {
   whatsapp: string;
 }
 
-type Campo = keyof FormState | 'avatar' | 'motivos';
+type Campo = keyof FormState | 'avatar' | 'motivos' | 'coberturas';
 
 const INICIAL: FormState = {
   nombre: '',
@@ -67,11 +69,12 @@ function validar(f: FormState, avatar: File | null): Errores<Campo> {
   return e;
 }
 
-export default function RegisterForm({ motivos }: { motivos: MotivoConsulta[] }) {
+export default function RegisterForm({ motivos, coberturas }: { motivos: MotivoConsulta[]; coberturas: Cobertura[] }) {
   const router = useRouter();
   const [f, setF] = useState<FormState>(INICIAL);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [motivoIds, setMotivoIds] = useState<string[]>([]);
+  const [coberturaIds, setCoberturaIds] = useState<string[]>([]);
   const [errores, setErrores] = useState<Errores<Campo>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +98,9 @@ export default function RegisterForm({ motivos }: { motivos: MotivoConsulta[] })
     const v = validar(f, avatar);
     const errMotivos = validateMotivos(motivoIds, motivosDeEspecialidad(motivos, f.especialidad).length);
     if (errMotivos) v.motivos = errMotivos;
+    // Solo cuentan coberturas activas de la lista (la base vuelve a filtrarlas).
+    const errCoberturas = validateCoberturas(seleccionValida(coberturaIds, coberturas), coberturas.length);
+    if (errCoberturas) v.coberturas = errCoberturas;
     setErrores(v);
     if (hasErrors(v)) {
       setError('Revisá los campos marcados.');
@@ -115,6 +121,7 @@ export default function RegisterForm({ motivos }: { motivos: MotivoConsulta[] })
           bio: f.bio,
           habilidades: splitList(f.habilidades),
           motivoIds,
+          coberturaIds: seleccionValida(coberturaIds, coberturas),
           modalidad: f.modalidad,
           precio: precio === 'invalid' ? null : precio,
           whatsapp: f.whatsapp,
@@ -224,6 +231,16 @@ export default function RegisterForm({ motivos }: { motivos: MotivoConsulta[] })
             if (errores.motivos) setErrores((prev) => ({ ...prev, motivos: undefined }));
           }}
           error={errores.motivos}
+        />
+        <CoberturasSelector
+          coberturas={coberturas}
+          value={coberturaIds}
+          onChange={(ids) => {
+            setCoberturaIds(ids);
+            if (errores.coberturas) setErrores((prev) => ({ ...prev, coberturas: undefined }));
+          }}
+          error={errores.coberturas}
+          requerido
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Precio de la consulta (ARS)" htmlFor="precio" error={errores.precio} hint="Dejalo vacío para “A convenir”">
