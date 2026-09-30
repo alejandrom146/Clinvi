@@ -18,11 +18,13 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   }
   const { user, profile } = await getSessionInfo();
   if (!user) redirect('/ingresar?next=/panel');
+  // Las cuentas de administración no usan el panel profesional: su panel es /admin.
+  if (profile?.rol === 'admin') redirect('/admin');
   const profesional = await getMyProfesional();
 
   return (
     <div className="min-h-screen lg:flex">
-      <PanelSidebar nombre={profesional?.nombre ?? profile?.nombre ?? user.email ?? null} slug={profesional?.slug ?? null} isAdmin={profile?.rol === 'admin'} />
+      <PanelSidebar nombre={profesional?.nombre ?? profile?.nombre ?? user.email ?? null} slug={profesional?.slug ?? null} isAdmin={false} />
       <main className="min-w-0 flex-1 bg-cream px-4 py-6 sm:px-9 sm:py-9">
         <div className="mx-auto w-full max-w-5xl">{children}</div>
       </main>

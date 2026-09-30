@@ -5,6 +5,14 @@ import type { Cobertura, FiltrosBusqueda, Modalidad, MotivoConsulta, SearchParam
 const first = (v: string | string[] | undefined): string => (Array.isArray(v) ? v[0] : v) ?? '';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Órdenes en los que los profesionales destacados aparecen primero.
+ * Por defecto solo en "Recomendados" (el orden con el que arranca toda búsqueda):
+ * si el paciente elige A–Z o Menor precio, se respeta su elección.
+ * Para que aparezcan primero en todos los órdenes: ['rating', 'az', 'precio'].
+ */
+export const DESTACADOS_PRIMERO_EN: readonly FiltrosBusqueda['orden'][] = ['rating'];
+
 /** Máximo de resultados que devuelve el buscador (comportamiento existente). */
 export const LIMITE_RESULTADOS = 60;
 
@@ -157,6 +165,8 @@ export function aplicarFiltros<Q extends ConsultaFiltrable<Q>>(query: Q, f: Filt
     q = q.ilike('search_text', `%${term}%`);
   }
 
+  // Destacados primero (mayor nivel primero); dentro de cada nivel, el orden elegido.
+  if (DESTACADOS_PRIMERO_EN.includes(f.orden)) q = q.order('destacado_nivel', { ascending: false });
   if (f.orden === 'az') q = q.order('nombre', { ascending: true });
   else if (f.orden === 'precio') q = q.order('precio', { ascending: true, nullsFirst: false });
   else q = q.order('rating', { ascending: false }).order('resenas_count', { ascending: false });

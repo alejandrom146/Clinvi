@@ -122,6 +122,25 @@ describe.skipIf(!habilitado)('integración: buscador y seguridad contra Supabase
     expect(perfil?.motivosConsulta.map((m) => m.motivo)).toEqual(['Duelo']);
   });
 
+  it('destacados primero en Recomendados, sin cambiar su puntuación', async () => {
+    const r = (await searchProfesionales(parseFiltros({ especialidad: 'Psicología' }))).filter((p) => esFixture(p.id));
+    expect(r.map((p) => p.id)).toEqual([F.elena, F.ana, F.bruno]);
+    expect(r[0].destacado_nivel).toBe(2);
+    expect(Number(r[0].rating)).toBeCloseTo(4.1);
+  });
+
+  it('A–Z respeta la elección del paciente aunque haya destacados', async () => {
+    const r = (await searchProfesionales(parseFiltros({ especialidad: 'Psicología', orden: 'az' }))).filter((p) => esFixture(p.id));
+    expect(r.map((p) => p.id)).toEqual([F.ana, F.bruno, F.elena]);
+  });
+
+  it('un visitante no puede cambiar el nivel de destacado', async () => {
+    const { data } = await supabase.from('profesionales').update({ destacado_nivel: 3 }).eq('id', F.ana).select('id');
+    expect(data ?? []).toHaveLength(0);
+    const perfil = await getProfesionalBySlug('zz-prueba-f1');
+    expect(perfil?.destacado_nivel).toBe(0);
+  });
+
   it('un visitante no puede crear, editar ni asignar coberturas', async () => {
     const alta = await supabase.from('coberturas').insert({ tipo: 'prepaga', nombre: 'ZZ Intrusa' });
     expect(alta.error).not.toBeNull();

@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import type { Cobertura, FiltrosBusqueda, Modalidad, MotivoConsulta, Orden } from '@/types';
 
 const ORDENES: { value: Orden; label: string }[] = [
-  { value: 'rating', label: '★ Mejor puntuados' },
+  { value: 'rating', label: '★ Recomendados' },
   { value: 'az', label: 'A–Z' },
   { value: 'precio', label: 'Menor precio' },
 ];

@@ -7,7 +7,7 @@ import Logo from '@/components/layout/Logo';
 import LogoutButton from '@/components/auth/LogoutButton';
 import { cn } from '@/lib/utils';
 
-export default function AdminNav({ resenasPendientes }: { resenasPendientes: number }) {
+export default function AdminNav({ resenasPendientes, nombre }: { resenasPendientes: number; nombre: string }) {
   const pathname = usePathname();
   const items = [
     { href: '/admin', label: 'Profesionales', active: pathname === '/admin' || pathname.startsWith('/admin/profesionales') },
@@ -23,6 +23,9 @@ export default function AdminNav({ resenasPendientes }: { resenasPendientes: num
         <div className="flex items-center gap-3">
           <Logo />
           <span className="rounded-full bg-terra-strong px-2.5 py-0.5 text-[11px] font-semibold text-white">Admin</span>
+          <span className="hidden max-w-[220px] truncate text-sm text-muted sm:inline" title={nombre}>
+            {nombre}
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <Link href="/" className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-forest/80 hover:text-forest sm:inline-flex">

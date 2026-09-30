@@ -9,6 +9,8 @@ import Avatar from '@/components/ui/Avatar';
 import { buttonClasses } from '@/components/ui/Button';
 import { Card, CardTitle } from '@/components/ui/Card';
 import Stars from '@/components/ui/Stars';
+import DestacadoBadge from '@/components/profile/DestacadoBadge';
+import { ACLARACION_DESTACADO, esDestacado } from '@/lib/destacados';
 import { ESTADO_PROFESIONAL_LABEL, modalidadLabel } from '@/lib/constants';
 import { agruparPorTipo, etiquetaCompleta, etiquetaCorta } from '@/lib/coberturas';
 import { filtrosToQuery } from '@/lib/search';
@@ -75,6 +77,7 @@ export default function ProfessionalProfile({ profesional: p, resenas, isOwner }
                     Verificado
                   </span>
                 )}
+                <DestacadoBadge nivel={p.destacado_nivel} className="px-3.5 py-[5px] text-[13px]" />
                 <span className="rounded-full border-[1.5px] border-line bg-cream px-3.5 py-[5px] text-[13px] font-medium text-muted">{p.especialidad}</span>
                 <span className="rounded-full border-[1.5px] border-line bg-cream px-3.5 py-[5px] text-[13px] font-medium text-muted">{modalidadLabel(p.modalidad)}</span>
                 {p.matricula && (
@@ -84,6 +87,7 @@ export default function ProfessionalProfile({ profesional: p, resenas, isOwner }
                   </span>
                 )}
               </div>
+              {esDestacado(p.destacado_nivel) && <p className="mt-2.5 max-w-xl text-xs leading-relaxed text-muted">{ACLARACION_DESTACADO}</p>}
               <a href="#reservar" className={buttonClasses('accent', 'md', 'mt-5 text-white hover:text-white lg:hidden')}>
                 <CalendarCheck className="h-4 w-4" aria-hidden="true" />
                 Reservar turno

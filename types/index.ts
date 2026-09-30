@@ -37,6 +37,8 @@ export interface Profesional {
   is_demo: boolean;
   created_at: string;
   updated_at: string;
+  /** 0 = sin destacar; 1–3 = nivel del plan de visibilidad (solo lo cambia un admin). */
+  destacado_nivel: number;
 }
 
 export interface Horario {

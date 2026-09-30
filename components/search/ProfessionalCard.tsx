@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BadgeCheck, MapPin } from 'lucide-react';
+import DestacadoBadge from '@/components/profile/DestacadoBadge';
 import Avatar from '@/components/ui/Avatar';
 import Stars from '@/components/ui/Stars';
 import { formatPrecio } from '@/lib/utils';
@@ -28,10 +29,13 @@ export default function ProfessionalCard({ profesional: p }: { profesional: Prof
               </span>
             )}
           </p>
-          <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-forest/[0.08] px-2.5 py-[3px] text-[11px] font-semibold text-forest">
-            <BadgeCheck className="h-3 w-3" aria-hidden="true" />
-            Verificado
-          </span>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-forest/[0.08] px-2.5 py-[3px] text-[11px] font-semibold text-forest">
+              <BadgeCheck className="h-3 w-3" aria-hidden="true" />
+              Verificado
+            </span>
+            <DestacadoBadge nivel={p.destacado_nivel} />
+          </div>
           <div className="mt-1.5">
             <Stars value={p.rating} count={p.resenas_count} />
           </div>

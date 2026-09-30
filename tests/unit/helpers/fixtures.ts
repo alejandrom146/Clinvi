@@ -75,6 +75,7 @@ function pro(
     rating: 0,
     resenas_count: 0,
     is_demo: false,
+    destacado_nivel: 0,
     created_at: T,
     updated_at: T,
     ...datos,

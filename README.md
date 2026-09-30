@@ -75,9 +75,11 @@ En Supabase → **SQL Editor** → **New query**:
    Crea la lista maestra de coberturas médicas, la relación profesional ↔ cobertura, sus reglas y RLS. No carga datos.
 4. Nueva query con [`supabase/coberturas_import.sql`](supabase/coberturas_import.sql) → **Run**.
    Carga las 78 coberturas del CSV y muestra una fila por registro con la acción aplicada. Ver [sección 14](#14-coberturas-médicas).
-5. (Opcional, recomendado para probar) Nueva query con [`supabase/seed.sql`](supabase/seed.sql) → **Run**.
+5. Nueva query con [`supabase/destacados.sql`](supabase/destacados.sql) → **Run**.
+   Agrega el nivel de destacado de los profesionales (plan de visibilidad). Ver [sección 16](#16-profesionales-destacados).
+6. (Opcional, recomendado para probar) Nueva query con [`supabase/seed.sql`](supabase/seed.sql) → **Run**.
    Carga 8 profesionales demo (una por especialidad) con horarios y reseñas. Quedan marcados con `is_demo = true`.
-6. Para borrar los datos demo más adelante: ejecutá [`supabase/reset_demo.sql`](supabase/reset_demo.sql). No toca datos reales.
+7. Para borrar los datos demo más adelante: ejecutá [`supabase/reset_demo.sql`](supabase/reset_demo.sql). No toca datos reales.
 
 ### 3.3 Obtener las credenciales
 
@@ -288,6 +290,7 @@ Todas usan UUID, foreign keys, timestamps e índices.
 | No se sube la foto | Verificá que exista el bucket `avatars` (lo crea `schema.sql`). |
 | No veo “Administración” | Ejecutá `supabase/create_admin.sql` con tu email y volvé a ingresar. |
 | “Falta ejecutar supabase/coberturas.sql” | Ejecutá `coberturas.sql` y después `coberturas_import.sql`. |
+| No puedo cambiar el nivel de destacado | Falta ejecutar `destacados.sql`, o la cuenta no tiene rol admin (`create_admin.sql`). |
 | El filtro de coberturas aparece vacío | Falta ejecutar `coberturas_import.sql`, o todas están desactivadas en `/admin/coberturas`. |
 
 ---
@@ -489,7 +492,7 @@ Se usa **Vitest 3.2** (compatible con Node 18, 20 y 22). Las pruebas no reemplaz
 
 Usá **un proyecto de Supabase separado, nunca producción**:
 
-1. En el proyecto de prueba ejecutá `schema.sql`, `motivos_consulta.sql`, `coberturas.sql`, `coberturas_import.sql` y después [`tests/integration/fixture.sql`](tests/integration/fixture.sql).
+1. En el proyecto de prueba ejecutá `schema.sql`, `motivos_consulta.sql`, `coberturas.sql`, `coberturas_import.sql`, `destacados.sql` y después [`tests/integration/fixture.sql`](tests/integration/fixture.sql).
 2. Ejecutá (PowerShell):
    ```powershell
    $env:CLINVI_TEST_SUPABASE_URL="https://<proyecto-de-prueba>.supabase.co"
@@ -500,3 +503,37 @@ Usá **un proyecto de Supabase separado, nunca producción**:
 3. Para limpiar los datos de prueba: [`tests/integration/fixture_cleanup.sql`](tests/integration/fixture_cleanup.sql).
 
 Usá siempre la **anon key**: las pruebas verifican lo que puede hacer un visitante, y la `service_role` saltearía las políticas RLS.
+
+---
+
+## 16. Profesionales destacados
+
+Plan de visibilidad que ClinVi ofrece a los profesionales. **No modifica las estrellas**: la puntuación sigue saliendo solo de reseñas de pacientes.
+
+| Nivel | Distintivo |
+| --- | --- |
+| 0 | Sin destacar (por defecto) |
+| 1 | Destacado |
+| 2 | Destacado Plus |
+| 3 | Destacado Premium |
+
+- **Quién lo asigna**: solo una cuenta admin, desde `/admin` (selector con ícono de medalla en cada profesional). Se guarda al elegir. Si un profesional intenta cambiarse el nivel, aunque manipule la petición, la base conserva el valor anterior.
+- **Buscador**: en el orden por defecto (**★ Recomendados**) los destacados aparecen primero, de mayor a menor nivel; dentro de cada nivel, por puntuación. Si el paciente elige **A–Z** o **Menor precio**, se respeta su elección. Para que vayan primero en todos los órdenes, cambiá `DESTACADOS_PRIMERO_EN` en `lib/search.ts` a `['rating', 'az', 'precio']`.
+- **Ser destacado no saltea filtros**: un destacado solo aparece si cumple especialidad, motivo, cobertura, provincia y modalidad.
+- **Distintivo**: medalla con el nombre del nivel en la tarjeta del buscador y en el perfil público, con los colores de acento existentes. En el perfil se muestra una aclaración para pacientes: aparece primero por su plan y eso no modifica su puntuación.
+
+### Instalación
+
+1. Ejecutá [`supabase/destacados.sql`](supabase/destacados.sql) en el SQL Editor (re-ejecutable; todos arrancan en nivel 0).
+2. Ejecutá [`supabase/verificar_destacados.sql`](supabase/verificar_destacados.sql): las 8 filas deben decir `OK`.
+
+### Cómo probar a mano
+
+1. En `/admin` → Activos, elegí “Destacado Plus” para un profesional → aparece “Guardado”.
+2. En `/buscar` aparece primero, con la medalla. En su perfil se ve el distintivo y la aclaración.
+3. Ordená por A–Z: vuelve a su lugar alfabético.
+4. Volvé a “Sin destacar” → desaparece el distintivo y vuelve a su posición por puntuación.
+
+### Antes de hacer deploy en Vercel
+
+- Ejecutar `destacados.sql` en el Supabase de **producción** antes de publicar el código (si no, el buscador falla al ordenar).

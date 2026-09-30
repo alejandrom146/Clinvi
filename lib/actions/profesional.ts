@@ -42,6 +42,20 @@ export async function cambiarEstadoProfesional(id: string, estado: EstadoProfesi
  * Reemplaza los motivos del profesional vía RPC. La base verifica sesión,
  * dueño/admin, especialidad, motivos activos y el límite 1..8.
  */
+/**
+ * Solo admin: nivel de destacado 0–3. Si lo intenta otro usuario, la base
+ * conserva el valor anterior (trigger protect_destacado_nivel), por eso se
+ * verifica el valor guardado.
+ */
+export async function cambiarDestacado(id: string, nivel: number): Promise<void> {
+  if (!Number.isInteger(nivel) || nivel < 0 || nivel > 3) throw new Error('Nivel de destacado inválido.');
+  const supabase = createClient();
+  const { data, error } = await supabase.from('profesionales').update({ destacado_nivel: nivel }).eq('id', id).select('destacado_nivel');
+  if (error) throw error;
+  const guardado = (data as { destacado_nivel: number }[] | null)?.[0]?.destacado_nivel;
+  if (guardado !== nivel) throw new Error('NO_AUTORIZADO');
+}
+
 export async function guardarMotivos(profesionalId: string, motivoIds: string[]): Promise<void> {
   const ids = Array.from(new Set(motivoIds));
   if (ids.length > MAX_MOTIVOS) throw new Error('MOTIVOS_MAXIMO');

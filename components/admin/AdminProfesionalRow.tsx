@@ -5,6 +5,8 @@ import Badge, { estadoTone } from '@/components/ui/Badge';
 import Stars from '@/components/ui/Stars';
 import { ESTADO_PROFESIONAL_LABEL } from '@/lib/constants';
 import { formatFechaHora, formatPrecio } from '@/lib/utils';
+import DestacadoBadge from '@/components/profile/DestacadoBadge';
+import DestacadoControl from './DestacadoControl';
 import EstadoActions from './EstadoActions';
 import type { ProfesionalAdmin } from '@/types';
 
@@ -20,6 +22,7 @@ export default function AdminProfesionalRow({ profesional: p, detallado = false 
             </Link>
             <Badge tone={estadoTone(p.estado)}>{ESTADO_PROFESIONAL_LABEL[p.estado]}</Badge>
             {p.is_demo && <Badge tone="neutral">Demo</Badge>}
+            <DestacadoBadge nivel={p.destacado_nivel} />
           </div>
           <p className="text-sm text-brand-700">{p.especialidad}</p>
           <dl className="mt-2 grid gap-x-6 gap-y-1 text-xs text-muted sm:grid-cols-2">
@@ -68,6 +71,7 @@ export default function AdminProfesionalRow({ profesional: p, detallado = false 
           <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
           Editar
         </Link>
+        <DestacadoControl id={p.id} nivel={p.destacado_nivel} />
         <EstadoActions id={p.id} estado={p.estado} />
       </div>
     </li>

@@ -2,7 +2,7 @@
 -- ClinVi — Datos para las pruebas de integración (npm run test:integration)
 --
 -- ⚠️  Ejecutar SOLO en un proyecto de Supabase DE PRUEBA, nunca en producción.
--- Requiere: schema.sql, motivos_consulta.sql, coberturas.sql y coberturas_import.sql.
+-- Requiere: schema.sql, motivos_consulta.sql, coberturas.sql, coberturas_import.sql y destacados.sql.
 -- Es re-ejecutable: borra y recrea sus propios datos (ids fijos 00000000-0000-4000-9000-…).
 -- Para limpiar sin recrear: tests/integration/fixture_cleanup.sql
 -- =====================================================================
@@ -61,6 +61,9 @@ join public.coberturas c
 -- La cobertura de prueba se desactiva DESPUÉS de vincularla (vínculo histórico).
 update public.coberturas set activo = false where id = '00000000-0000-4000-9000-00000000c0f1';
 update public.motivos_consulta set activo = false where id = '00000000-0000-4000-9000-00000000a0f1';
+
+-- Elena (puntuación 4.1) es "Destacado Plus": debe aparecer antes que Ana (4.9) en Recomendados.
+update public.profesionales set destacado_nivel = 2 where id = '00000000-0000-4000-9000-0000000000f5';
 
 -- Control: se esperan 7 vínculos de motivos y 8 de coberturas.
 select

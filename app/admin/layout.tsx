@@ -47,7 +47,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <div className="min-h-screen">
-      <AdminNav resenasPendientes={pendientes} />
+      <AdminNav resenasPendientes={pendientes} nombre={profile.nombre?.trim() || user.email || 'Administración'} />
       <main className="mx-auto w-full max-w-[1050px] px-4 py-8 sm:px-7 sm:py-9">{children}</main>
     </div>
   );

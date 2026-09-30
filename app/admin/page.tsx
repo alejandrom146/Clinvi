@@ -27,7 +27,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   return (
     <div>
-      <PageHeader title="Administración" description="Verificación manual de profesionales" />
+      <PageHeader
+        title={profile.nombre?.trim() ? `Hola, ${profile.nombre.trim().split(/\s+/)[0]}` : 'Administración'}
+        description="Panel de administración de ClinVi · Verificación manual de profesionales"
+      />
       <Tabs items={VISTAS.map((v) => ({ href: v.href, label: v.label, active: vista === v.key, count: filtrar(v.key).length }))} />
       {lista.length === 0 ? (
         <EmptyState

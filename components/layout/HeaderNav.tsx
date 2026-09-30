@@ -29,7 +29,8 @@ export default function HeaderNav({ isLoggedIn, isAdmin }: Props) {
 
   const links = [
     { href: '/buscar', label: 'Buscar profesionales', icon: Search, show: true, variant: 'ghost' as const },
-    { href: '/panel', label: 'Mi panel', icon: LayoutDashboard, show: isLoggedIn, variant: 'ghost' as const },
+    // Las administradoras usan /admin como su panel (aunque su cuenta tenga una ficha profesional vieja).
+    { href: '/panel', label: 'Mi panel', icon: LayoutDashboard, show: isLoggedIn && !isAdmin, variant: 'ghost' as const },
     { href: '/registro', label: 'Soy profesional', icon: UserPlus, show: !isLoggedIn, variant: 'outline' as const },
     { href: '/admin', label: 'Administración', icon: ShieldCheck, show: isAdmin, variant: 'accent' as const },
   ].filter((l) => l.show);

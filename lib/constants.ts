@@ -1,4 +1,4 @@
-import { Apple, Baby, Brain, Dumbbell, Ear, Pill, Smile, Sparkles, Stethoscope, type LucideIcon } from 'lucide-react';
+import { Apple, Baby, BookOpen, Brain, Dumbbell, Ear, Hand, HeartHandshake, PersonStanding, Pill, Smile, Sparkles, Stethoscope, type LucideIcon } from 'lucide-react';
 import type { EstadoProfesional, EstadoResena, Modalidad, TipoCobertura } from '@/types';
 
 export interface Especialidad {
@@ -17,6 +17,10 @@ export const ESPECIALIDADES: Especialidad[] = [
   { nombre: 'Odontología', descripcion: 'Orientación y urgencias', icon: Smile },
   { nombre: 'Dermatología', descripcion: 'Piel, cabello y uñas', icon: Sparkles },
   { nombre: 'Fonoaudiología', descripcion: 'Lenguaje y voz', icon: Ear },
+  { nombre: 'Terapia ocupacional', descripcion: 'Autonomía y vida diaria', icon: Hand },
+  { nombre: 'Acompañamiento terapéutico', descripcion: 'Apoyo en lo cotidiano', icon: HeartHandshake },
+  { nombre: 'Psicopedagogía', descripcion: 'Aprendizaje y escolaridad', icon: BookOpen },
+  { nombre: 'Psicomotricidad', descripcion: 'Cuerpo, juego y movimiento', icon: PersonStanding },
 ];
 
 export const ESPECIALIDAD_NOMBRES = ESPECIALIDADES.map((e) => e.nombre);
@@ -85,6 +89,14 @@ export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 /** Límites de motivos por profesional (también validados en la base). */
 export const MAX_MOTIVOS = 8;
 export const MIN_MOTIVOS = 1;
+
+/** Niveles del plan de visibilidad. 0 = sin destacar. No modifican la puntuación de pacientes. */
+export const NIVELES_DESTACADO: { nivel: number; label: string }[] = [
+  { nivel: 0, label: 'Sin destacar' },
+  { nivel: 1, label: 'Destacado' },
+  { nivel: 2, label: 'Destacado Plus' },
+  { nivel: 3, label: 'Destacado Premium' },
+];
 
 /** Tipos de cobertura en el orden en que se muestran (también validados en la base). */
 export const TIPOS_COBERTURA: { value: TipoCobertura; label: string; plural: string }[] = [
