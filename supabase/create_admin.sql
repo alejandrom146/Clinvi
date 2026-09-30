@@ -15,8 +15,7 @@
 insert into public.profiles (id, email, rol, nombre)
 select u.id, u.email, 'admin', a.nombre
 from (values
-  ('pau@tudominio.com',  'Pau'),
-  ('flor@tudominio.com', 'Flor')
+  ('clinvifp@gmail.com', 'Admin')
 ) as a(email, nombre)
 join auth.users u on lower(u.email) = lower(a.email)
 on conflict (id) do update set rol = 'admin', nombre = excluded.nombre;
